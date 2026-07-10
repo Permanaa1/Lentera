@@ -7,6 +7,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ParentPortal\DashboardController as ParentDashboardController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Admin\AcademicYearController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\SchoolClassController;
+use App\Http\Controllers\Admin\SemesterController;
+use App\Http\Controllers\Admin\SubjectController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,6 +46,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
         Route::post('/users/{user}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
+
+        Route::resource('academic-years', AcademicYearController::class);
+        Route::post('academic-years/{academic_year}/activate', [AcademicYearController::class, 'activate'])
+            ->name('academic-years.activate');
+
+        Route::resource('semesters', SemesterController::class);
+        Route::resource('departments', DepartmentController::class);
+        Route::resource('subjects', SubjectController::class);
+        Route::resource('classes', SchoolClassController::class);
+        Route::resource('schedules', ScheduleController::class);
+
     });
 
     // ---------- Guru ----------

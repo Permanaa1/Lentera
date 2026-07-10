@@ -1,12 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Kelola Pengguna')
 
-@section('content')
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold">Kelola Pengguna</h1>
-    <a href="{{ route('admin.dashboard') }}" class="text-sm text-indigo-600 hover:underline">← Dashboard</a>
-</div>
+@section('admin-content')
+<h1 class="text-xl font-semibold mb-6">Kelola Pengguna</h1>
 
 <form method="GET" class="flex gap-3 mb-4 text-sm">
     <select name="role" class="border rounded px-2 py-1" onchange="this.form.submit()">
@@ -72,7 +69,5 @@
     </table>
 </div>
 
-<div class="mt-4">
-    {{ $users->links() }}
-</div>
+<div class="mt-4">{{ $users->links() }}</div>
 @endsection

@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard Admin')
 
-@section('content')
+@section('admin-content')
 <h1 class="text-xl font-semibold mb-6">Dashboard Admin</h1>
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -37,11 +37,7 @@
     @if ($stats['active_academic_year'])
         <p class="font-medium">{{ $stats['active_academic_year']->name }}</p>
     @else
-        <p class="text-gray-400 italic">Belum ada tahun ajaran aktif.</p>
+        <p class="text-gray-400 italic">Belum ada tahun ajaran aktif. <a href="{{ route('admin.academic-years.index') }}" class="text-indigo-600 hover:underline">Atur di sini</a>.</p>
     @endif
 </div>
-
-<a href="{{ route('admin.users.index') }}" class="text-indigo-600 hover:underline text-sm">
-    → Kelola Pengguna
-</a>
 @endsection
