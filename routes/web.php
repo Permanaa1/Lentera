@@ -13,6 +13,10 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SchoolClassController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Teacher\AttendanceController;
+use App\Http\Controllers\Teacher\CourseController;
+use App\Http\Controllers\Teacher\GradeController;
+use App\Http\Controllers\Teacher\ReportCardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,6 +66,20 @@ Route::middleware('auth')->group(function () {
     // ---------- Guru ----------
     Route::middleware('role:teacher')->prefix('guru')->name('teacher.')->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+        Route::post('/courses/sync', [CourseController::class, 'sync'])->name('courses.sync');
+
+        Route::get('/courses/{course}/grades', [GradeController::class, 'show'])->name('grades.show');
+        Route::put('/courses/{course}/grades', [GradeController::class, 'update'])->name('grades.update');
+
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/attendance/{schedule}', [AttendanceController::class, 'create'])->name('attendance.create');
+        Route::post('/attendance/{schedule}', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::get('/attendance/{schedule}/recap', [AttendanceController::class, 'recap'])->name('attendance.recap');
+
+        Route::get('/report-card', [ReportCardController::class, 'index'])->name('report-card.index');
+        Route::get('/report-card/{class}/{student}', [ReportCardController::class, 'show'])->name('report-card.show');
     });
 
     // ---------- Murid ----------
