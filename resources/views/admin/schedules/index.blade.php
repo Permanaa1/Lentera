@@ -41,7 +41,7 @@
                     <td class="px-4 py-2">{{ $schedule->schoolClass->name ?? '-' }}</td>
                     <td class="px-4 py-2">{{ $schedule->subject->name ?? '-' }}</td>
                     <td class="px-4 py-2">{{ $schedule->teacher->user->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $schedule->room ?? '-' }}</td>
+                    <td class="px-4 py-2">{{ $schedule->room->code ?? '-' }}</td>
                     <td class="px-4 py-2 space-x-2">
                         <a href="{{ route('admin.schedules.edit', $schedule) }}" class="text-indigo-600 hover:underline">Edit</a>
                         <form method="POST" action="{{ route('admin.schedules.destroy', $schedule) }}" class="inline"

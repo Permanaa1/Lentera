@@ -45,8 +45,20 @@
 
 <div>
     <label class="block text-sm font-medium mb-1">Ruang (opsional)</label>
-    <input type="text" name="room" value="{{ old('room', $schedule->room ?? '') }}"
-           placeholder="contoh: R.201" class="w-full border rounded px-3 py-2 text-sm">
+    <select name="room_id" class="w-full border rounded px-3 py-2 text-sm">
+        <option value="">— Tidak ada —</option>
+        @foreach ($rooms as $room)
+            <option value="{{ $room->id }}"
+                {{ (old('room_id', $schedule->room_id ?? '')) == $room->id ? 'selected' : '' }}>
+                {{ $room->code }} — {{ $room->name }}
+            </option>
+        @endforeach
+    </select>
+    @if ($rooms->isEmpty())
+        <p class="text-xs text-gray-400 mt-1">
+            Belum ada data ruang. <a href="{{ route('admin.rooms.create') }}" class="text-indigo-600 hover:underline">Tambah dulu di sini</a>.
+        </p>
+    @endif
 </div>
 
 <div>

@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'E-Learning') — Sistem Akademik</title>
-    {{-- Sementara pakai Tailwind CDN untuk checkpoint testing Fase 1-3.
-         Ganti ke build Vite (npm run build) begitu masuk Fase Frontend penuh. --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -15,6 +13,13 @@
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <a href="{{ route('dashboard') }}" class="font-semibold text-indigo-600">E-Learning TA</a>
             <div class="flex items-center gap-4 text-sm">
+                <a href="{{ route('notifications.index') }}" class="relative text-gray-500 hover:text-indigo-600">
+                    Notifikasi
+                    @php $unread = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
+                    @if ($unread > 0)
+                        <span class="ml-1 px-1.5 py-0.5 bg-red-500 text-white rounded-full text-xs">{{ $unread }}</span>
+                    @endif
+                </a>
                 <span class="text-gray-500">
                     {{ auth()->user()->name }}
                     <span class="ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs uppercase">

@@ -4,19 +4,37 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ParentPortal\DashboardController as ParentDashboardController;
-use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
-use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\NotificationController;
+
+//Admin
 use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SchoolClassController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
+use App\Http\Controllers\Admin\ParentStudentController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+
+
+//Guru
+use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\Teacher\AttendanceController;
 use App\Http\Controllers\Teacher\CourseController;
 use App\Http\Controllers\Teacher\GradeController;
 use App\Http\Controllers\Teacher\ReportCardController;
+use App\Http\Controllers\Teacher\AnnouncementController as TeacherAnnouncementController;
+
+//Murid
+use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+
+//Wali Murid
+use App\Http\Controllers\ParentPortal\DashboardController as ParentDashboardController;
+use App\Http\Controllers\ParentPortal\StudentController as ParentStudentDetailController;
+
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,15 +60,18 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    
     // ---------- Admin ----------
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+        //Akademik
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
         Route::post('/users/{user}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
-
+                
         Route::resource('academic-years', AcademicYearController::class);
         Route::post('academic-years/{academic_year}/activate', [AcademicYearController::class, 'activate'])
             ->name('academic-years.activate');
@@ -60,6 +81,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::resource('classes', SchoolClassController::class);
         Route::resource('schedules', ScheduleController::class);
+        Route::resource('rooms', RoomController::class);
+
+        Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
+        Route::get('students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
+        Route::put('students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
+        Route::get('parent-links', [ParentStudentController::class, 'index'])->name('parent-links.index');
+        Route::get('parent-links/create', [ParentStudentController::class, 'create'])->name('parent-links.create');
+        Route::post('parent-links', [ParentStudentController::class, 'store'])->name('parent-links.store');
+        Route::delete('parent-links/{parentLink}', [ParentStudentController::class, 'destroy'])->name('parent-links.destroy');
+        Route::resource('announcements', AdminAnnouncementController::class)->only(['index', 'create', 'store', 'destroy']);
 
     });
 
@@ -80,6 +111,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/report-card', [ReportCardController::class, 'index'])->name('report-card.index');
         Route::get('/report-card/{class}/{student}', [ReportCardController::class, 'show'])->name('report-card.show');
+
+        Route::get('announcements', [TeacherAnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('courses/{course}/announcements/create', [TeacherAnnouncementController::class, 'create'])->name('courses.announcements.create');
+        Route::post('courses/{course}/announcements', [TeacherAnnouncementController::class, 'store'])->name('courses.announcements.store');
     });
 
     // ---------- Murid ----------
@@ -90,5 +125,7 @@ Route::middleware('auth')->group(function () {
     // ---------- Wali Murid ----------
     Route::middleware('role:parent')->prefix('wali')->name('parent.')->group(function () {
         Route::get('/dashboard', [ParentDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('students/{student}', [ParentStudentDetailController::class, 'show'])->name('students.show');
     });
 });

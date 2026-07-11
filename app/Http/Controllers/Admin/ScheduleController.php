@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Room;
 use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\Subject;
@@ -12,15 +13,13 @@ use Illuminate\Validation\ValidationException;
 
 class ScheduleController extends Controller
 {
-    // Implementasi SRS-40 (manageSchedule) & SRS-41 (assignTeacherLoad) / ELIW-lain terkait jadwal.
-    // assignTeacherLoad tercakup di sini karena penugasan guru mengajar terjadi
-    // saat guru dipasangkan ke jadwal (class + subject + teacher).
+    // Implementasi SRS-40 (manageSchedule) & SRS-41 (assignTeacherLoad).
 
     protected array $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
     public function index(Request $request)
     {
-        $schedules = Schedule::with('schoolClass', 'subject', 'teacher.user')
+        $schedules = Schedule::with('schoolClass', 'subject', 'teacher.user', 'room')
             ->when($request->filled('class_id'), fn ($q) => $q->where('class_id', $request->class_id))
             ->orderByRaw("FIELD(day, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
             ->orderBy('start_time')
@@ -34,9 +33,9 @@ class ScheduleController extends Controller
 
     public function create()
     {
-        [$classes, $subjects, $teachers] = $this->formOptions();
+        [$classes, $subjects, $teachers, $rooms] = $this->formOptions();
 
-        return view('admin.schedules.create', compact('classes', 'subjects', 'teachers'), ['days' => $this->days]);
+        return view('admin.schedules.create', compact('classes', 'subjects', 'teachers', 'rooms'), ['days' => $this->days]);
     }
 
     public function store(Request $request)
@@ -53,9 +52,9 @@ class ScheduleController extends Controller
 
     public function edit(Schedule $schedule)
     {
-        [$classes, $subjects, $teachers] = $this->formOptions();
+        [$classes, $subjects, $teachers, $rooms] = $this->formOptions();
 
-        return view('admin.schedules.edit', compact('schedule', 'classes', 'subjects', 'teachers'), ['days' => $this->days]);
+        return view('admin.schedules.edit', compact('schedule', 'classes', 'subjects', 'teachers', 'rooms'), ['days' => $this->days]);
     }
 
     public function update(Request $request, Schedule $schedule)
@@ -84,7 +83,7 @@ class ScheduleController extends Controller
             'class_id' => ['required', 'exists:classes,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
             'teacher_id' => ['required', 'exists:teachers,id'],
-            'room' => ['nullable', 'string', 'max:50'],
+            'room_id' => ['nullable', 'exists:rooms,id'],
             'day' => ['required', 'in:' . implode(',', $this->days)],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
@@ -92,19 +91,9 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Cegah 3 jenis bentrok jadwal sekaligus:
-     * 1. Guru yang sama tidak boleh mengajar 2 kelas di hari & jam yang tumpang tindih.
-     * 2. Kelas yang sama tidak boleh punya 2 pelajaran di hari & jam yang tumpang tindih.
-     * 3. Ruang yang sama (kalau diisi) tidak boleh dipakai 2 jadwal berbeda di jam yang tumpang tindih.
-     *
-     * Catatan soal poin 3: karena "room" masih kolom teks bebas (bukan tabel master
-     * tersendiri -- lihat catatan Fase 4 soal Ruang Kelas), pengecekan ini rawan
-     * lolos kalau penulisannya beda-beda (mis. "R.201" vs "R201" dianggap 2 ruang
-     * berbeda). Begitu tabel `rooms` dibuat nanti, validasi ini idealnya diganti
-     * membandingkan room_id, bukan string.
-     *
-     * ValidationException dipakai (bukan abort_if) supaya Laravel otomatis
-     * redirect-back dengan pesan error tampil di form, bukan halaman error mentah.
+     * Cegah 3 jenis bentrok jadwal: guru, kelas, dan ruang.
+     * Sejak Opsi B (perbaikan Fase 4), room_id dibandingkan sebagai FK -- akurat,
+     * tidak lagi rawan typo seperti saat masih teks bebas.
      */
     protected function assertNoConflict(array $data, ?int $ignoreId = null): void
     {
@@ -142,15 +131,15 @@ class ScheduleController extends Controller
             ]);
         }
 
-        if (! empty($data['room'])) {
-            $roomConflict = Schedule::where('room', $data['room'])
+        if (! empty($data['room_id'])) {
+            $roomConflict = Schedule::where('room_id', $data['room_id'])
                 ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
                 ->where($overlap)
                 ->exists();
 
             if ($roomConflict) {
                 throw ValidationException::withMessages([
-                    'room' => "Ruang \"{$data['room']}\" sudah dipakai jadwal lain di hari & jam yang sama.",
+                    'room_id' => 'Ruang ini sudah dipakai jadwal lain di hari & jam yang sama.',
                 ]);
             }
         }
@@ -162,6 +151,7 @@ class ScheduleController extends Controller
             SchoolClass::orderBy('name')->get(),
             Subject::orderBy('name')->get(),
             Teacher::with('user')->get(),
+            Room::orderBy('code')->get(),
         ];
     }
 }

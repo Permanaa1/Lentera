@@ -13,7 +13,9 @@ return new class extends Migration
             $table->foreignId('class_id')->constrained('classes')->cascadeOnDelete();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
-            $table->string('room', 50)->nullable();
+            // Diubah dari string bebas menjadi FK ke tabel rooms (Opsi B, perbaikan Fase 4)
+            // supaya validasi bentrok ruang akurat (bandingkan ID, bukan teks).
+            $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
             $table->string('day', 20); // Senin, Selasa, dst
             $table->time('start_time');
             $table->time('end_time');

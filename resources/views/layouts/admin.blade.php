@@ -8,12 +8,18 @@
                 $menu = [
                     ['route' => 'admin.dashboard', 'label' => 'Dashboard'],
                     ['route' => 'admin.users.index', 'label' => 'Pengguna'],
+                    ['route' => 'admin.students.index', 'label' => 'Kelola Murid'],
+                    ['route' => 'admin.parent-links.index', 'label' => 'Wali Murid & Anak'],
                     ['route' => 'admin.academic-years.index', 'label' => 'Tahun Ajaran'],
                     ['route' => 'admin.semesters.index', 'label' => 'Semester'],
                     ['route' => 'admin.departments.index', 'label' => 'Jurusan'],
                     ['route' => 'admin.subjects.index', 'label' => 'Mata Pelajaran'],
                     ['route' => 'admin.classes.index', 'label' => 'Kelas (Rombel)'],
+                    ['route' => 'admin.rooms.index', 'label' => 'Ruang Kelas'],
                     ['route' => 'admin.schedules.index', 'label' => 'Jadwal'],
+                    ['route' => 'admin.invoices.index', 'label' => 'Tagihan'],
+                    ['route' => 'admin.payments.index', 'label' => 'Pembayaran'],
+                    ['route' => 'admin.announcements.index', 'label' => 'Pengumuman'],
                 ];
             @endphp
 

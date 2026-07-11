@@ -10,12 +10,14 @@
     <p class="text-sm font-medium mb-3">Anak yang terhubung ({{ $students->count() }})</p>
 
     @forelse ($students as $student)
-        <div class="border-t py-2 text-sm">
-            {{ $student->user->name ?? '-' }} — NIS: {{ $student->nis }}
-            (Kelas: {{ $student->schoolClass->name ?? '-' }})
+        <div class="border-t py-2 text-sm flex justify-between items-center">
+            <span>{{ $student->user->name ?? '-' }} — NIS: {{ $student->nis }} (Kelas: {{ $student->schoolClass->name ?? '-' }})</span>
+            <a href="{{ route('parent.students.show', $student) }}" class="text-indigo-600 hover:underline text-xs">Lihat Detail</a>
         </div>
     @empty
-        <p class="text-gray-400 italic text-sm">Belum ada anak yang terhubung ke akun ini. (Perlu linkStudent() manual dulu lewat tinker/admin, fitur UI-nya belum ada sampai fase ini)</p>
+        <p class="text-gray-400 italic text-sm">
+            Belum ada anak yang terhubung ke akun ini. Minta admin menghubungkan lewat menu "Wali Murid & Anak".
+        </p>
     @endforelse
 </div>
 @endsection
