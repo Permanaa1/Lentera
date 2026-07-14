@@ -5,12 +5,21 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-xl font-semibold">
-        Rekap Absensi — {{ $schedule->subject->name ?? '-' }} ({{ $schedule->schoolClass->name ?? '-' }})
+        Absensi Tanggal Ini — {{ $schedule->subject->name ?? '-' }} ({{ $schedule->schoolClass->name ?? '-' }})
         <span class="text-sm font-normal text-gray-500">{{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}</span>
     </h1>
-    <a href="{{ route('teacher.attendance.create', ['schedule' => $schedule, 'date' => $date]) }}"
-       class="text-sm text-indigo-600 hover:underline">Edit Absensi Ini</a>
+    <div class="flex gap-3 text-sm">
+        <a href="{{ route('teacher.attendance.create', ['schedule' => $schedule, 'date' => $date, 'edit' => 1]) }}"
+           class="text-indigo-600 hover:underline">Edit Absensi Ini</a>
+        <a href="{{ route('teacher.attendance.class-recap', $schedule) }}" class="text-gray-600 hover:underline">
+            Rekap Keseluruhan
+        </a>
+    </div>
 </div>
+
+<p class="text-xs text-gray-400 mb-4">
+    Data ini sudah tersimpan. Untuk mengubahnya, klik "Edit Absensi Ini" di atas -- ini mencegah perubahan tidak sengaja.
+</p>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <table class="w-full text-sm">

@@ -5,8 +5,13 @@
 @section('admin-content')
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-xl font-semibold">Jadwal Pelajaran</h1>
-    <a href="{{ route('admin.schedules.create') }}"
-       class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Tambah</a>
+    <div class="flex gap-3">
+        <a href="{{ route('admin.schedules.calendar') }}" class="text-sm text-indigo-600 hover:underline self-center">
+            Lihat sebagai Jadwal Mingguan
+        </a>
+        <a href="{{ route('admin.schedules.create') }}"
+           class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Tambah</a>
+    </div>
 </div>
 
 <form method="GET" class="mb-4 text-sm">

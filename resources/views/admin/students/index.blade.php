@@ -25,6 +25,7 @@
                 <th class="px-4 py-2">NIS</th>
                 <th class="px-4 py-2">Nama</th>
                 <th class="px-4 py-2">Kelas</th>
+                <th class="px-4 py-2">Kode Wali Murid</th>
                 <th class="px-4 py-2">Status</th>
                 <th class="px-4 py-2 w-24">Aksi</th>
             </tr>
@@ -41,17 +42,23 @@
                             <span class="text-red-500 text-xs">Belum ada kelas</span>
                         @endif
                     </td>
+                    <td class="px-4 py-2 font-mono text-xs">{{ $student->parent_link_code }}</td>
                     <td class="px-4 py-2">{{ $student->academic_status }}</td>
                     <td class="px-4 py-2">
                         <a href="{{ route('admin.students.edit', $student) }}" class="text-indigo-600 hover:underline">Edit</a>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td></tr>
+                <tr><td colspan="6" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td></tr>
             @endforelse
         </tbody>
     </table>
 </div>
+
+<p class="text-xs text-gray-400 mt-3">
+    "Kode Wali Murid" dibagikan ke orang tua/wali (misal lewat surat/pesan) supaya mereka bisa
+    menghubungkan akun sendiri ke murid ini dari halaman "Hubungkan Anak" tanpa perlu admin setiap saat.
+</p>
 
 <div class="mt-4">{{ $students->links() }}</div>
 @endsection

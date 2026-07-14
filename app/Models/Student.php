@@ -3,10 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    protected $fillable = ['user_id', 'class_id', 'nis', 'academic_status'];
+    protected $fillable = ['user_id', 'class_id', 'nis', 'parent_link_code', 'academic_status'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Student $student) {
+            if (empty($student->parent_link_code)) {
+                do {
+                    $code = strtoupper(Str::random(8));
+                } while (static::where('parent_link_code', $code)->exists());
+
+                $student->parent_link_code = $code;
+            }
+        });
+    }
 
     public function user()
     {
@@ -55,8 +69,6 @@ class Student extends Model
     {
         return $this->hasMany(Invoice::class);
     }
-
-    // ================= Method =================
 
     public function isActive(): bool
     {

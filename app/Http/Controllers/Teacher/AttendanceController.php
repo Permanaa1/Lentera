@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    // Implementasi SRS-42 (recordAttendance) & SRS-43 (viewAttendanceRecap) /
-    // use case scenario "Kelola Absensi" (C200 Tabel 2.12).
-    // Sengaja TIDAK bergantung ke Course -- langsung dari Schedule (Fase 4),
-    // supaya berfungsi penuh terlepas dari keputusan custom-LMS vs Moodle.
-
     public function index(Request $request)
     {
         $teacher = $request->user()->teacher;
@@ -26,18 +21,28 @@ class AttendanceController extends Controller
         return view('teacher.attendance.index', compact('schedules'));
     }
 
+    /**
+     * PERBAIKAN UX: kalau absensi tanggal ini SUDAH pernah diisi, jangan langsung
+     * tampilkan form yang bisa ditimpa sembarangan -- arahkan dulu ke halaman rekap
+     * (read-only). Guru harus sengaja klik "Edit Absensi Ini" untuk masuk mode ubah.
+     * Ini mencegah radio button ke-klik tidak sengaja lalu ke-save tanpa sadar.
+     */
     public function create(Request $request, Schedule $schedule)
     {
         $this->authorizeSchedule($request, $schedule);
 
         $date = $request->query('date', now()->toDateString());
 
-        $students = $schedule->schoolClass->students()->with('user')->orderBy('nis')->get();
-
         $existing = Attendance::where('schedule_id', $schedule->id)
             ->where('attendance_date', $date)
             ->get()
             ->keyBy('student_id');
+
+        if ($existing->isNotEmpty() && ! $request->boolean('edit')) {
+            return redirect()->route('teacher.attendance.recap', ['schedule' => $schedule, 'date' => $date]);
+        }
+
+        $students = $schedule->schoolClass->students()->with('user')->orderBy('nis')->get();
 
         return view('teacher.attendance.create', compact('schedule', 'students', 'existing', 'date'));
     }
@@ -79,6 +84,29 @@ class AttendanceController extends Controller
             ->get();
 
         return view('teacher.attendance.recap', compact('schedule', 'attendances', 'date'));
+    }
+
+    /**
+     * BARU: rekap keseluruhan (semua tanggal yang pernah diisi) per jadwal --
+     * total hadir/alpa/sakit/izin per murid, bukan cuma 1 tanggal.
+     */
+    public function classRecap(Request $request, Schedule $schedule)
+    {
+        $this->authorizeSchedule($request, $schedule);
+
+        $students = $schedule->schoolClass->students()->with('user')->orderBy('nis')->get();
+
+        $counts = Attendance::where('schedule_id', $schedule->id)
+            ->selectRaw('student_id, status, count(*) as total')
+            ->groupBy('student_id', 'status')
+            ->get()
+            ->groupBy('student_id');
+
+        $totalMeetings = Attendance::where('schedule_id', $schedule->id)
+            ->distinct('attendance_date')
+            ->count('attendance_date');
+
+        return view('teacher.attendance.class-recap', compact('schedule', 'students', 'counts', 'totalMeetings'));
     }
 
     protected function authorizeSchedule(Request $request, Schedule $schedule): void

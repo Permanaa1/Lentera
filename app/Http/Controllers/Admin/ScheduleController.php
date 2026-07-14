@@ -13,8 +13,6 @@ use Illuminate\Validation\ValidationException;
 
 class ScheduleController extends Controller
 {
-    // Implementasi SRS-40 (manageSchedule) & SRS-41 (assignTeacherLoad).
-
     protected array $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
     public function index(Request $request)
@@ -31,6 +29,52 @@ class ScheduleController extends Controller
         return view('admin.schedules.index', compact('schedules', 'classes'));
     }
 
+    /**
+     * Tampilan jadwal sebagai grid mingguan (hari x jam) per kelas -- jauh lebih
+     * mudah dibaca dibanding tabel baris panjang, dan bentrok kelihatan visual
+     * (2 mapel nempel di kolom hari yang sama).
+     */
+    public function calendar(Request $request)
+    {
+        $classes = SchoolClass::orderBy('name')->get();
+
+        $classId = $request->query('class_id', optional($classes->first())->id);
+
+        $schedules = Schedule::where('class_id', $classId)
+            ->with('subject', 'teacher.user', 'room')
+            ->get();
+
+        // Kumpulkan slot waktu unik yang benar-benar dipakai kelas ini, urut dari pagi.
+        $slots = $schedules
+            ->map(fn ($s) => $s->start_time . '|' . $s->end_time)
+            ->unique()
+            ->sort()
+            ->values()
+            ->map(function ($slot) {
+                [$start, $end] = explode('|', $slot);
+
+                return ['start' => $start, 'end' => $end];
+            });
+
+        // Susun grid: [index slot][hari] => Schedule|null
+        $grid = [];
+        foreach ($slots as $i => $slot) {
+            foreach ($this->days as $day) {
+                $grid[$i][$day] = $schedules->first(fn ($s) => $s->day === $day
+                    && $s->start_time === $slot['start']
+                    && $s->end_time === $slot['end']);
+            }
+        }
+
+        return view('admin.schedules.calendar', [
+            'classes' => $classes,
+            'classId' => $classId,
+            'days' => $this->days,
+            'slots' => $slots,
+            'grid' => $grid,
+        ]);
+    }
+
     public function create()
     {
         [$classes, $subjects, $teachers, $rooms] = $this->formOptions();
@@ -41,13 +85,10 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateData($request);
-
         $this->assertNoConflict($data);
-
         Schedule::create($data);
 
-        return redirect()->route('admin.schedules.index')
-            ->with('status', 'Jadwal berhasil ditambahkan.');
+        return redirect()->route('admin.schedules.index')->with('status', 'Jadwal berhasil ditambahkan.');
     }
 
     public function edit(Schedule $schedule)
@@ -60,21 +101,17 @@ class ScheduleController extends Controller
     public function update(Request $request, Schedule $schedule)
     {
         $data = $this->validateData($request);
-
         $this->assertNoConflict($data, $schedule->id);
-
         $schedule->update($data);
 
-        return redirect()->route('admin.schedules.index')
-            ->with('status', 'Jadwal berhasil diperbarui.');
+        return redirect()->route('admin.schedules.index')->with('status', 'Jadwal berhasil diperbarui.');
     }
 
     public function destroy(Schedule $schedule)
     {
         $schedule->delete();
 
-        return redirect()->route('admin.schedules.index')
-            ->with('status', 'Jadwal berhasil dihapus.');
+        return redirect()->route('admin.schedules.index')->with('status', 'Jadwal berhasil dihapus.');
     }
 
     protected function validateData(Request $request): array
@@ -90,11 +127,6 @@ class ScheduleController extends Controller
         ]);
     }
 
-    /**
-     * Cegah 3 jenis bentrok jadwal: guru, kelas, dan ruang.
-     * Sejak Opsi B (perbaikan Fase 4), room_id dibandingkan sebagai FK -- akurat,
-     * tidak lagi rawan typo seperti saat masih teks bebas.
-     */
     protected function assertNoConflict(array $data, ?int $ignoreId = null): void
     {
         $overlap = function ($query) use ($data) {
@@ -111,36 +143,27 @@ class ScheduleController extends Controller
 
         $teacherConflict = Schedule::where('teacher_id', $data['teacher_id'])
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-            ->where($overlap)
-            ->exists();
+            ->where($overlap)->exists();
 
         if ($teacherConflict) {
-            throw ValidationException::withMessages([
-                'teacher_id' => 'Guru ini sudah punya jadwal lain yang bentrok di hari & jam yang sama.',
-            ]);
+            throw ValidationException::withMessages(['teacher_id' => 'Guru ini sudah punya jadwal lain yang bentrok di hari & jam yang sama.']);
         }
 
         $classConflict = Schedule::where('class_id', $data['class_id'])
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-            ->where($overlap)
-            ->exists();
+            ->where($overlap)->exists();
 
         if ($classConflict) {
-            throw ValidationException::withMessages([
-                'class_id' => 'Kelas ini sudah punya jadwal lain yang bentrok di hari & jam yang sama.',
-            ]);
+            throw ValidationException::withMessages(['class_id' => 'Kelas ini sudah punya jadwal lain yang bentrok di hari & jam yang sama.']);
         }
 
         if (! empty($data['room_id'])) {
             $roomConflict = Schedule::where('room_id', $data['room_id'])
                 ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-                ->where($overlap)
-                ->exists();
+                ->where($overlap)->exists();
 
             if ($roomConflict) {
-                throw ValidationException::withMessages([
-                    'room_id' => 'Ruang ini sudah dipakai jadwal lain di hari & jam yang sama.',
-                ]);
+                throw ValidationException::withMessages(['room_id' => 'Ruang ini sudah dipakai jadwal lain di hari & jam yang sama.']);
             }
         }
     }

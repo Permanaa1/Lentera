@@ -3,7 +3,11 @@
 @section('title', 'Dashboard Wali Murid')
 
 @section('content')
-<h1 class="text-xl font-semibold mb-2">Dashboard Wali Murid</h1>
+<div class="flex items-center justify-between mb-2">
+    <h1 class="text-xl font-semibold">Dashboard Wali Murid</h1>
+    <a href="{{ route('parent.link.create') }}"
+       class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Hubungkan Anak</a>
+</div>
 <p class="text-sm text-gray-500 mb-6">Halo, {{ auth()->user()->name }}</p>
 
 <div class="bg-white p-4 rounded-lg shadow">
@@ -16,7 +20,7 @@
         </div>
     @empty
         <p class="text-gray-400 italic text-sm">
-            Belum ada anak yang terhubung ke akun ini. Minta admin menghubungkan lewat menu "Wali Murid & Anak".
+            Belum ada anak yang terhubung. Klik "+ Hubungkan Anak" di atas dan masukkan kode dari sekolah.
         </p>
     @endforelse
 </div>

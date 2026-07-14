@@ -10,6 +10,12 @@
     <a href="{{ route('teacher.attendance.index') }}" class="text-sm text-indigo-600 hover:underline">← Jadwal Saya</a>
 </div>
 
+@if ($existing->isNotEmpty())
+    <p class="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 rounded px-3 py-2 mb-4">
+        Anda sedang MENGUBAH absensi yang sudah tersimpan untuk tanggal ini. Perubahan akan menimpa data lama.
+    </p>
+@endif
+
 <form method="GET" class="mb-4 text-sm">
     <label class="mr-2">Tanggal:</label>
     <input type="date" name="date" value="{{ $date }}" onchange="this.form.submit()" class="border rounded px-2 py-1">

@@ -17,9 +17,9 @@
                     ['route' => 'admin.classes.index', 'label' => 'Kelas (Rombel)'],
                     ['route' => 'admin.rooms.index', 'label' => 'Ruang Kelas'],
                     ['route' => 'admin.schedules.index', 'label' => 'Jadwal'],
+                    ['route' => 'admin.announcements.index', 'label' => 'Pengumuman'],
                     ['route' => 'admin.invoices.index', 'label' => 'Tagihan'],
                     ['route' => 'admin.payments.index', 'label' => 'Pembayaran'],
-                    ['route' => 'admin.announcements.index', 'label' => 'Pengumuman'],
                 ];
             @endphp
 
