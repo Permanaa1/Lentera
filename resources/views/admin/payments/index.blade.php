@@ -3,10 +3,11 @@
 @section('title', 'Pembayaran')
 
 @section('admin-content')
-<h1 class="text-xl font-semibold mb-6">Riwayat & Verifikasi Pembayaran</h1>
+<x-page-header title="Riwayat & Verifikasi Pembayaran" subtitle="Pembayaran yang menunggu verifikasi butuh tindakan segera." />
 
 <form method="GET" class="mb-4 text-sm">
-    <select name="status" class="border rounded px-2 py-1" onchange="this.form.submit()">
+    <select name="status" onchange="this.form.submit()"
+            class="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
         <option value="">Semua Status</option>
         @foreach (['pending' => 'Menunggu Verifikasi', 'verified' => 'Terverifikasi', 'rejected' => 'Ditolak'] as $val => $label)
             <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
@@ -14,63 +15,62 @@
     </select>
 </form>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[700px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Tanggal</th>
-                <th class="px-4 py-2">Murid</th>
-                <th class="px-4 py-2">Jenis Tagihan</th>
-                <th class="px-4 py-2">Jumlah</th>
-                <th class="px-4 py-2">Bukti</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2 w-32">Aksi</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Tanggal</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Murid</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Jenis</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Jumlah</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Bukti</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Status</th>
+                <th class="px-4 py-3 font-semibold text-gray-600 w-40">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($payments as $payment)
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ $payment->payment_date?->format('d M Y H:i') ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $payment->invoice->student->user->name ?? '-' }}</td>
-                    <td class="px-4 py-2 uppercase text-xs">{{ $payment->invoice->invoice_type ?? '-' }}</td>
-                    <td class="px-4 py-2">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
-                    <td class="px-4 py-2">
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Tanggal" class="px-4 py-3 text-gray-500">{{ $payment->payment_date?->format('d M Y H:i') ?? '-' }}</td>
+                    <td data-label="Murid" class="px-4 py-3 font-medium text-gray-800">{{ $payment->invoice->student->user->name ?? '-' }}</td>
+                    <td data-label="Jenis" class="px-4 py-3"><x-badge color="secondary">{{ $payment->invoice->invoice_type ?? '-' }}</x-badge></td>
+                    <td data-label="Jumlah" class="px-4 py-3 font-medium">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
+                    <td data-label="Bukti" class="px-4 py-3">
                         @if ($payment->proof_file_path)
                             <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($payment->proof_file_path) }}"
-                               target="_blank" class="text-indigo-600 hover:underline">Lihat</a>
+                               target="_blank" class="text-primary hover:underline">Lihat</a>
                         @else
                             <span class="text-gray-400 text-xs">manual</span>
                         @endif
                     </td>
-                    <td class="px-4 py-2">
-                        <span @class([
-                            'px-2 py-0.5 rounded text-xs',
-                            'bg-yellow-100 text-yellow-800' => $payment->status === 'pending',
-                            'bg-green-100 text-green-800' => $payment->status === 'verified',
-                            'bg-red-100 text-red-800' => $payment->status === 'rejected',
-                        ])>{{ $payment->status }}</span>
+                    <td data-label="Status" class="px-4 py-3">
+                        <x-badge :color="match($payment->status) { 'verified' => 'success', 'pending' => 'warning', 'rejected' => 'danger', default => 'gray' }">
+                            {{ $payment->status }}
+                        </x-badge>
                     </td>
-                    <td class="px-4 py-2 space-x-2">
+                    <td data-label="Aksi" class="px-4 py-3">
                         @if ($payment->status === 'pending')
-                            <form method="POST" action="{{ route('admin.payments.verify', $payment) }}" class="inline">
-                                @csrf
-                                <button class="text-green-600 hover:underline">Verifikasi</button>
-                            </form>
-                            <form method="POST" action="{{ route('admin.payments.reject', $payment) }}" class="inline">
-                                @csrf
-                                <button class="text-red-600 hover:underline">Tolak</button>
-                            </form>
+                            <div class="flex gap-3 justify-end sm:justify-start">
+                                <form method="POST" action="{{ route('admin.payments.verify', $payment) }}">
+                                    @csrf
+                                    <button class="text-success hover:underline text-sm font-medium">Verifikasi</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.payments.reject', $payment) }}">
+                                    @csrf
+                                    <button class="text-danger hover:underline text-sm font-medium">Tolak</button>
+                                </form>
+                            </div>
                         @else
-                            <a href="{{ route('admin.invoices.show', $payment->invoice) }}" class="text-indigo-600 hover:underline">Detail</a>
+                            <a href="{{ route('admin.invoices.show', $payment->invoice) }}" class="text-primary hover:underline text-sm font-medium">Detail</a>
                         @endif
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">Belum ada pembayaran.</td></tr>
+                <tr><td colspan="7"><x-empty-state message="Belum ada pembayaran." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 
 <div class="mt-4">{{ $payments->links() }}</div>
 @endsection

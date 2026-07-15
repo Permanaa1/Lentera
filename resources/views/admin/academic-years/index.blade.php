@@ -3,55 +3,64 @@
 @section('title', 'Tahun Ajaran')
 
 @section('admin-content')
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold">Tahun Ajaran</h1>
-    <a href="{{ route('admin.academic-years.create') }}"
-       class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Tambah</a>
-</div>
+<x-page-header title="Tahun Ajaran" subtitle="Kelola periode tahun ajaran & tentukan yang aktif saat ini.">
+    <x-slot:actions>
+        <x-button href="{{ route('admin.academic-years.create') }}" variant="primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah
+        </x-button>
+    </x-slot:actions>
+</x-page-header>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[560px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Nama</th>
-                <th class="px-4 py-2">Periode</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2 w-56">Aksi</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Periode</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Status</th>
+                <th class="px-4 py-3 font-semibold text-gray-600 w-56">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($academicYears as $year)
-                <tr class="border-t">
-                    <td class="px-4 py-2 font-medium">{{ $year->name }}</td>
-                    <td class="px-4 py-2">{{ $year->start_date->format('d M Y') }} — {{ $year->end_date->format('d M Y') }}</td>
-                    <td class="px-4 py-2">
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Nama" class="px-4 py-3 font-medium text-gray-800">{{ $year->name }}</td>
+                    <td data-label="Periode" class="px-4 py-3 text-gray-600">
+                        {{ $year->start_date->format('d M Y') }} — {{ $year->end_date->format('d M Y') }}
+                    </td>
+                    <td data-label="Status" class="px-4 py-3">
                         @if ($year->is_active)
-                            <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">Aktif</span>
+                            <x-badge color="success">Aktif</x-badge>
                         @else
-                            <span class="px-2 py-0.5 rounded text-xs bg-gray-200 text-gray-600">Nonaktif</span>
+                            <x-badge color="gray">Nonaktif</x-badge>
                         @endif
                     </td>
-                    <td class="px-4 py-2 space-x-2">
-                        @unless ($year->is_active)
-                            <form method="POST" action="{{ route('admin.academic-years.activate', $year) }}" class="inline">
-                                @csrf
-                                <button class="text-green-600 hover:underline">Aktifkan</button>
+                    <td data-label="Aksi" class="px-4 py-3">
+                        <div class="flex items-center gap-3 justify-end sm:justify-start flex-wrap">
+                            @unless ($year->is_active)
+                                <form method="POST" action="{{ route('admin.academic-years.activate', $year) }}">
+                                    @csrf
+                                    <button class="text-success hover:underline text-sm font-medium">Aktifkan</button>
+                                </form>
+                            @endunless
+                            <a href="{{ route('admin.academic-years.edit', $year) }}" class="text-primary hover:underline text-sm font-medium">Edit</a>
+                            <form method="POST" action="{{ route('admin.academic-years.destroy', $year) }}"
+                                  onsubmit="return confirm('Yakin hapus tahun ajaran ini?')">
+                                @csrf @method('DELETE')
+                                <button class="text-danger hover:underline text-sm font-medium">Hapus</button>
                             </form>
-                        @endunless
-                        <a href="{{ route('admin.academic-years.edit', $year) }}" class="text-indigo-600 hover:underline">Edit</a>
-                        <form method="POST" action="{{ route('admin.academic-years.destroy', $year) }}" class="inline"
-                              onsubmit="return confirm('Yakin hapus tahun ajaran ini?')">
-                            @csrf @method('DELETE')
-                            <button class="text-red-600 hover:underline">Hapus</button>
-                        </form>
+                        </div>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td></tr>
+                <tr><td colspan="4"><x-empty-state message="Belum ada tahun ajaran. Klik &quot;Tambah&quot; untuk membuat yang pertama." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 
 <div class="mt-4">{{ $academicYears->links() }}</div>
 @endsection

@@ -3,39 +3,48 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="max-w-sm mx-auto bg-white p-6 rounded-lg shadow mt-10">
-    <h1 class="text-xl font-semibold mb-1">Masuk ke Sistem</h1>
-    <p class="text-sm text-gray-500 mb-6">Login sebagai Admin, Guru, Murid, atau Wali Murid.</p>
-
-    @if ($errors->any())
-        <div class="mb-4 px-4 py-3 rounded bg-red-100 text-red-700 text-sm">
-            {{ $errors->first() }}
+<div class="min-h-[75vh] flex items-center justify-center">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-primary flex items-center justify-center text-secondary font-bold text-xl shadow-md">
+                E
+            </div>
+            <h1 class="mt-3 text-lg font-semibold text-gray-800">Sistem Akademik & E-Learning</h1>
+            <p class="text-sm text-gray-500">Masuk untuk melanjutkan</p>
         </div>
-    @endif
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-4">
-        @csrf
-        <div>
-            <label class="block text-sm font-medium mb-1">Email</label>
-            <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                   class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Password</label>
-            <input type="password" name="password" required
-                   class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="remember"> Ingat saya
-        </label>
-        <button type="submit"
-                class="w-full bg-indigo-600 text-white py-2 rounded text-sm font-medium hover:bg-indigo-700">
-            Login
-        </button>
-    </form>
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+            @if ($errors->any())
+                <x-alert type="danger" class="mb-4">{{ $errors->first() }}</x-alert>
+            @endif
 
-    <p class="text-sm text-gray-500 mt-4 text-center">
-        Belum punya akun? <a href="{{ route('register') }}" class="text-indigo-600 hover:underline">Daftar</a>
-    </p>
+            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm
+                                  focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" name="password" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm
+                                  focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
+                </div>
+                <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" name="remember" class="rounded border-gray-300 text-primary focus:ring-primary">
+                    Ingat saya
+                </label>
+                <x-button type="submit" variant="primary" class="w-full py-2.5">
+                    Login
+                </x-button>
+            </form>
+        </div>
+
+        <p class="text-sm text-gray-500 mt-5 text-center">
+            Belum punya akun? <a href="{{ route('register') }}" class="text-primary font-medium hover:underline">Daftar</a>
+        </p>
+    </div>
 </div>
 @endsection
