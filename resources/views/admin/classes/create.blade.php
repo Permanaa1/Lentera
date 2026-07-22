@@ -1,17 +1,13 @@
 @extends('layouts.admin')
-
 @section('title', 'Tambah Kelas')
-
 @section('admin-content')
-<h1 class="text-xl font-semibold mb-6">Tambah Kelas</h1>
-
-<form method="POST" action="{{ route('admin.classes.store') }}" class="bg-white p-6 rounded-lg shadow space-y-4 max-w-md">
+<x-page-header title="Tambah Kelas" :back="route('admin.classes.index')" backLabel="Kelas" />
+<form method="POST" action="{{ route('admin.classes.store') }}" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4 max-w-md">
     @csrf
     @include('admin.classes._form')
-
-    <div class="flex gap-2">
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">Simpan</button>
-        <a href="{{ route('admin.classes.index') }}" class="px-4 py-2 rounded text-sm text-gray-600 hover:bg-gray-100">Batal</a>
+    <div class="flex gap-2 pt-2">
+        <x-button type="submit" variant="primary">Simpan</x-button>
+        <x-button href="{{ route('admin.classes.index') }}" variant="outline">Batal</x-button>
     </div>
 </form>
 @endsection

@@ -1,45 +1,53 @@
 @extends('layouts.admin')
-
 @section('title', 'Jurusan')
-
 @section('admin-content')
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold">Jurusan</h1>
-    <a href="{{ route('admin.departments.create') }}"
-       class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Tambah</a>
-</div>
+<x-page-header title="Jurusan" subtitle="Konsentrasi keahlian yang tersedia di sekolah."
+    :breadcrumbs="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Jurusan']]">
+    <x-slot:actions>
+        <x-button href="{{ route('admin.departments.create') }}" variant="primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah
+        </x-button>
+    </x-slot:actions>
+</x-page-header>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<form method="GET" class="flex flex-wrap items-center gap-2 mb-4">
+    <x-search-input placeholder="Cari kode/nama jurusan..." />
+    <x-button type="submit" variant="outline">Cari</x-button>
+</form>
+
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[480px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Kode</th>
-                <th class="px-4 py-2">Nama</th>
-                <th class="px-4 py-2">Jumlah Kelas</th>
-                <th class="px-4 py-2 w-40">Aksi</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Kode</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Jml Kelas</th>
+                <th class="px-4 py-3 font-semibold text-gray-600 w-28 text-right">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($departments as $dept)
-                <tr class="border-t">
-                    <td class="px-4 py-2 font-mono">{{ $dept->code }}</td>
-                    <td class="px-4 py-2">{{ $dept->name }}</td>
-                    <td class="px-4 py-2">{{ $dept->classes_count }}</td>
-                    <td class="px-4 py-2 space-x-2">
-                        <a href="{{ route('admin.departments.edit', $dept) }}" class="text-indigo-600 hover:underline">Edit</a>
-                        <form method="POST" action="{{ route('admin.departments.destroy', $dept) }}" class="inline"
-                              onsubmit="return confirm('Yakin hapus jurusan ini?')">
-                            @csrf @method('DELETE')
-                            <button class="text-red-600 hover:underline">Hapus</button>
-                        </form>
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Kode" class="px-4 py-3 font-mono text-gray-600">{{ $dept->code }}</td>
+                    <td data-label="Nama" class="px-4 py-3 font-medium text-gray-800">{{ $dept->name }}</td>
+                    <td data-label="Jml Kelas" class="px-4 py-3"><x-badge color="primary">{{ $dept->classes_count }}</x-badge></td>
+                    <td data-label="Aksi" class="px-4 py-3">
+                        <div class="flex items-center gap-1 justify-end">
+                            <x-icon-button variant="edit" label="Edit" :href="route('admin.departments.edit', $dept)" />
+                            <form method="POST" action="{{ route('admin.departments.destroy', $dept) }}"
+                                  onsubmit="return confirm('Yakin hapus jurusan ini?')">
+                                @csrf @method('DELETE')
+                                <x-icon-button variant="delete" label="Hapus" />
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td></tr>
+                <tr><td colspan="4"><x-empty-state message="Belum ada jurusan." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
-
+</x-table-wrapper>
 <div class="mt-4">{{ $departments->links() }}</div>
 @endsection

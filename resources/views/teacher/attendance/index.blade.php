@@ -1,38 +1,37 @@
 @extends('layouts.app')
-
 @section('title', 'Kelola Absensi')
-
 @section('content')
-<h1 class="text-xl font-semibold mb-6">Jadwal Mengajar Saya</h1>
-<p class="text-sm text-gray-500 mb-4">Pilih salah satu jadwal untuk mengisi absensi hari ini, atau lihat rekap keseluruhan.</p>
+<x-page-header title="Jadwal Mengajar Saya" subtitle="Pilih jadwal untuk isi absensi hari ini, atau lihat rekap keseluruhan." />
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[560px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Hari</th>
-                <th class="px-4 py-2">Jam</th>
-                <th class="px-4 py-2">Kelas</th>
-                <th class="px-4 py-2">Mata Pelajaran</th>
-                <th class="px-4 py-2 w-56">Aksi</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Hari</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Jam</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Kelas</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Mata Pelajaran</th>
+                <th class="px-4 py-3 font-semibold text-gray-600 w-56 text-right">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($schedules as $schedule)
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ $schedule->day }}</td>
-                    <td class="px-4 py-2">{{ substr($schedule->start_time, 0, 5) }}–{{ substr($schedule->end_time, 0, 5) }}</td>
-                    <td class="px-4 py-2">{{ $schedule->schoolClass->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $schedule->subject->name ?? '-' }}</td>
-                    <td class="px-4 py-2 space-x-2">
-                        <a href="{{ route('teacher.attendance.create', $schedule) }}" class="text-indigo-600 hover:underline">Isi Hari Ini</a>
-                        <a href="{{ route('teacher.attendance.class-recap', $schedule) }}" class="text-gray-600 hover:underline">Rekap Keseluruhan</a>
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Hari" class="px-4 py-3 text-gray-600">{{ $schedule->day }}</td>
+                    <td data-label="Jam" class="px-4 py-3 text-gray-600">{{ substr($schedule->start_time, 0, 5) }}–{{ substr($schedule->end_time, 0, 5) }}</td>
+                    <td data-label="Kelas" class="px-4 py-3 font-medium text-gray-800">{{ $schedule->schoolClass->name ?? '-' }}</td>
+                    <td data-label="Mata Pelajaran" class="px-4 py-3 text-gray-600">{{ $schedule->subject->name ?? '-' }}</td>
+                    <td data-label="Aksi" class="px-4 py-3">
+                        <div class="flex items-center gap-3 justify-end flex-wrap">
+                            <a href="{{ route('teacher.attendance.create', $schedule) }}" class="text-primary hover:underline text-sm font-medium">Isi Hari Ini</a>
+                            <a href="{{ route('teacher.attendance.class-recap', $schedule) }}" class="text-gray-500 hover:underline text-sm font-medium">Rekap</a>
+                        </div>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Belum ada jadwal mengajar.</td></tr>
+                <tr><td colspan="5"><x-empty-state message="Belum ada jadwal mengajar." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 @endsection

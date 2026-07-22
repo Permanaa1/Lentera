@@ -11,16 +11,17 @@ use Illuminate\Http\Request;
 
 class SchoolClassController extends Controller
 {
-    // Implementasi ELIW-07 (Mengelola data kelas / rombel akademik)
-    // Catatan: nama file/class controller "SchoolClassController" tapi route resource
-    // tetap pakai URI "classes" agar konsisten dengan nama tabel & konsep "kelas" di UI.
-
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = (int) $request->input('per_page', 10);
+        $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
         $classes = SchoolClass::with('department', 'academicYear', 'homeroomTeacher.user')
             ->withCount('students')
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
             ->orderBy('name')
-            ->paginate(10);
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('admin.classes.index', compact('classes'));
     }
@@ -36,6 +37,7 @@ class SchoolClassController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'tingkat' => ['nullable', 'integer', 'in:10,11,12'],
             'department_id' => ['required', 'exists:departments,id'],
             'academic_year_id' => ['required', 'exists:academic_years,id'],
             'homeroom_teacher_id' => ['nullable', 'exists:teachers,id'],
@@ -43,8 +45,7 @@ class SchoolClassController extends Controller
 
         SchoolClass::create($data);
 
-        return redirect()->route('admin.classes.index')
-            ->with('status', 'Kelas berhasil ditambahkan.');
+        return redirect()->route('admin.classes.index')->with('status', 'Kelas berhasil ditambahkan.');
     }
 
     public function edit(SchoolClass $class)
@@ -58,6 +59,7 @@ class SchoolClassController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'tingkat' => ['nullable', 'integer', 'in:10,11,12'],
             'department_id' => ['required', 'exists:departments,id'],
             'academic_year_id' => ['required', 'exists:academic_years,id'],
             'homeroom_teacher_id' => ['nullable', 'exists:teachers,id'],
@@ -65,8 +67,7 @@ class SchoolClassController extends Controller
 
         $class->update($data);
 
-        return redirect()->route('admin.classes.index')
-            ->with('status', 'Kelas berhasil diperbarui.');
+        return redirect()->route('admin.classes.index')->with('status', 'Kelas berhasil diperbarui.');
     }
 
     public function destroy(SchoolClass $class)
@@ -77,8 +78,7 @@ class SchoolClassController extends Controller
 
         $class->delete();
 
-        return redirect()->route('admin.classes.index')
-            ->with('status', 'Kelas berhasil dihapus.');
+        return redirect()->route('admin.classes.index')->with('status', 'Kelas berhasil dihapus.');
     }
 
     protected function formOptions(): array

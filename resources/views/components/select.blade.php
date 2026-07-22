@@ -1,7 +1,7 @@
 @props(['label' => null, 'name', 'hint' => null])
 @php
     $hasError = $errors->has($name);
-    $base = 'w-full border rounded-lg px-3 py-2.5 text-sm bg-white transition focus:outline-none focus:ring-2';
+    $base = 'w-full border rounded-lg px-3 py-2.5 text-sm min-h-[44px] bg-white transition focus:outline-none focus:ring-2';
     $state = $hasError
         ? 'border-danger focus:ring-danger/20 focus:border-danger'
         : 'border-gray-300 focus:ring-primary/20 focus:border-primary';

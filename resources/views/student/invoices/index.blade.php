@@ -3,60 +3,56 @@
 @section('title', 'Tagihan Saya')
 
 @section('content')
-<h1 class="text-xl font-semibold mb-6">Tagihan Saya</h1>
+<x-page-header title="Tagihan Saya" subtitle="Bayar tagihan pendidikan dan pantau status verifikasinya di sini." />
 
 <div class="space-y-3">
     @forelse ($invoices as $invoice)
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="flex items-center justify-between">
+        <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="font-medium uppercase text-sm">{{ $invoice->invoice_type }}</p>
-                    <p class="text-lg font-semibold">Rp{{ number_format($invoice->amount, 0, ',', '.') }}</p>
-                    <p class="text-xs text-gray-500">Jatuh tempo: {{ $invoice->due_date->format('d M Y') }}</p>
+                    <x-badge color="secondary" class="mb-2">{{ strtoupper($invoice->invoice_type) }}</x-badge>
+                    <p class="text-xl font-bold text-gray-800">Rp{{ number_format($invoice->amount, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Jatuh tempo: {{ $invoice->due_date->format('d M Y') }}</p>
                 </div>
-                <div class="text-right">
-                    <span @class([
-                        'px-2 py-0.5 rounded text-xs',
-                        'bg-red-100 text-red-800' => $invoice->status === 'unpaid',
-                        'bg-green-100 text-green-800' => $invoice->status === 'paid',
-                        'bg-yellow-100 text-yellow-800' => $invoice->status === 'overdue',
-                    ])>{{ $invoice->status }}</span>
-
-                    @php $pending = $invoice->payments->firstWhere('status', 'pending'); @endphp
-
-                    @if ($invoice->status !== 'paid')
-                        @if ($pending)
-                            <p class="text-xs text-yellow-600 mt-2">Menunggu verifikasi admin</p>
-                        @else
-                            <a href="{{ route('student.invoices.payments.create', $invoice) }}"
-                               class="block mt-2 text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">
-                                Bayar Sekarang
-                            </a>
-                        @endif
-                    @endif
-                </div>
+                <x-badge :color="match($invoice->status) { 'paid' => 'success', 'overdue' => 'warning', default => 'danger' }">
+                    {{ $invoice->status }}
+                </x-badge>
             </div>
 
+            @php $pending = $invoice->payments->firstWhere('status', 'pending'); @endphp
+
+            @if ($invoice->status !== 'paid')
+                <div class="mt-3">
+                    @if ($pending)
+                        <p class="text-xs text-yellow-700 bg-warning-subtle rounded-lg px-3 py-2 inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Menunggu verifikasi admin
+                        </p>
+                    @else
+                        <x-button href="{{ route('student.invoices.payments.create', $invoice) }}" variant="primary">
+                            Bayar Sekarang
+                        </x-button>
+                    @endif
+                </div>
+            @endif
+
             @if ($invoice->payments->isNotEmpty())
-                <div class="mt-3 pt-3 border-t text-xs text-gray-500">
-                    <p class="font-medium mb-1">Riwayat pembayaran:</p>
+                <div class="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500 space-y-1">
+                    <p class="font-medium text-gray-600 mb-1">Riwayat pembayaran:</p>
                     @foreach ($invoice->payments as $payment)
-                        <p>
+                        <p class="flex items-center gap-1.5">
                             {{ $payment->payment_date?->format('d M Y') ?? '-' }} —
                             Rp{{ number_format($payment->amount, 0, ',', '.') }} —
-                            <span @class([
-                                'font-medium',
-                                'text-yellow-600' => $payment->status === 'pending',
-                                'text-green-600' => $payment->status === 'verified',
-                                'text-red-600' => $payment->status === 'rejected',
-                            ])>{{ $payment->status }}</span>
+                            <x-badge :color="match($payment->status) { 'verified' => 'success', 'pending' => 'warning', default => 'danger' }">
+                                {{ $payment->status }}
+                            </x-badge>
                         </p>
                     @endforeach
                 </div>
             @endif
         </div>
     @empty
-        <div class="bg-white p-6 rounded-lg shadow text-center text-gray-400">Belum ada tagihan.</div>
+        <x-empty-state message="Belum ada tagihan." />
     @endforelse
 </div>
 @endsection

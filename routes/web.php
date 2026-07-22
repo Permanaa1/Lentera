@@ -31,8 +31,17 @@ use App\Http\Controllers\Student\AttendanceController as StudentAttendanceContro
 use App\Http\Controllers\Student\GradeController as StudentGradeController;
 use App\Http\Controllers\Student\InvoiceController as StudentInvoiceController;
 use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
+use App\Http\Controllers\Admin\PromotionController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Route Fase 3 -- Autentikasi, RBAC & Checkpoint Testing
+|--------------------------------------------------------------------------
+| Gabungkan isi file ini ke routes/web.php project kamu.
+| Kalau routes/web.php sudah ada isi bawaan Laravel (welcome page dsb),
+| replace saja "/" nya dengan redirect ke login seperti di bawah.
+*/
 
 Route::get('/', fn () => redirect()->route('login'));
 
@@ -71,9 +80,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('classes', SchoolClassController::class);
         Route::resource('schedules', ScheduleController::class);
         Route::resource('rooms', RoomController::class);
-        Route::get('schedules-calendar', [\App\Http\Controllers\Admin\ScheduleController::class, 'calendar'])
-    ->name('schedules.calendar');
-
 
         //Payment
         Route::resource('invoices', InvoiceController::class)->except('edit', 'update');
@@ -85,8 +91,11 @@ Route::middleware('auth')->group(function () {
         Route::post('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
         Route::post('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
 
+        Route::get('promotions', [PromotionController::class, 'index'])->name('promotions.index');
+Route::get('promotions/{class}', [PromotionController::class, 'show'])->name('promotions.show');
+Route::post('promotions/{class}', [PromotionController::class, 'store'])->name('promotions.store');
 
-        //parent-student
+        //pa
         Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
         Route::get('students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
         Route::put('students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
@@ -97,6 +106,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('parent-links/{parentLink}', [ParentStudentController::class, 'destroy'])->name('parent-links.destroy');
 
         Route::resource('announcements', AdminAnnouncementController::class)->only(['index', 'create', 'store', 'destroy']);
+
+        Route::get('schedules-calendar', [\App\Http\Controllers\Admin\ScheduleController::class, 'calendar'])
+    ->name('schedules.calendar');
 
     });
 
@@ -120,9 +132,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/report-card', [ReportCardController::class, 'index'])->name('report-card.index');
         Route::get('/report-card/{class}/{student}', [ReportCardController::class, 'show'])->name('report-card.show');
 
-        Route::get('announcements', [TeacherAnnouncementController::class, 'index'])->name('announcements.index');
-        Route::get('courses/{course}/announcements/create', [TeacherAnnouncementController::class, 'create'])->name('courses.announcements.create');
-        Route::post('courses/{course}/announcements', [TeacherAnnouncementController::class, 'store'])->name('courses.announcements.store');
+    Route::get('announcements', [TeacherAnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('courses/{course}/announcements/create', [TeacherAnnouncementController::class, 'create'])->name('courses.announcements.create');
+    Route::post('courses/{course}/announcements', [TeacherAnnouncementController::class, 'store'])->name('courses.announcements.store');
     });
 
     // ---------- Murid ----------
@@ -134,7 +146,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices', [StudentInvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}/pay', [StudentPaymentController::class, 'create'])->name('invoices.payments.create');
         Route::post('/invoices/{invoice}/pay', [StudentPaymentController::class, 'store'])->name('invoices.payments.store');
-
     });
 
     // ---------- Wali Murid ----------
@@ -143,6 +154,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('students/{student}', [ParentStudentDetailController::class, 'show'])->name('students.show');
         Route::get('/link', [LinkController::class, 'create'])->name('link.create');
-Route::post('/link', [LinkController::class, 'store'])->name('link.store');
+        Route::post('/link', [LinkController::class, 'store'])->name('link.store');
     });
 });

@@ -1,34 +1,32 @@
 @extends('layouts.app')
-
 @section('title', 'Nilai Saya')
-
 @section('content')
-<h1 class="text-xl font-semibold mb-6">Nilai Saya</h1>
+<x-page-header title="Nilai Saya" />
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[520px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Mata Pelajaran</th>
-                <th class="px-4 py-2">Tugas</th>
-                <th class="px-4 py-2">Kuis</th>
-                <th class="px-4 py-2">Ujian</th>
-                <th class="px-4 py-2">Nilai Akhir</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Mata Pelajaran</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Tugas</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Kuis</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Ujian</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Nilai Akhir</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($grades as $grade)
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ $grade->course->subject->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $grade->assignment_score ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $grade->quiz_score ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $grade->exam_score ?? '-' }}</td>
-                    <td class="px-4 py-2 font-medium">{{ $grade->final_score ?? '-' }}</td>
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Mata Pelajaran" class="px-4 py-3 font-medium text-gray-800">{{ $grade->course->subject->name ?? '-' }}</td>
+                    <td data-label="Tugas" class="px-4 py-3 text-gray-600">{{ $grade->assignment_score ?? '-' }}</td>
+                    <td data-label="Kuis" class="px-4 py-3 text-gray-600">{{ $grade->quiz_score ?? '-' }}</td>
+                    <td data-label="Ujian" class="px-4 py-3 text-gray-600">{{ $grade->exam_score ?? '-' }}</td>
+                    <td data-label="Nilai Akhir" class="px-4 py-3 font-semibold text-primary">{{ $grade->final_score ?? '-' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Belum ada nilai.</td></tr>
+                <tr><td colspan="5"><x-empty-state message="Belum ada nilai." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 @endsection

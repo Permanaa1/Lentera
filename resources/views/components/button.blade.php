@@ -1,6 +1,7 @@
 @props(['variant' => 'primary', 'href' => null])
 @php
-    $base = 'inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-1';
+    // min-h-[44px] memastikan tombol memenuhi standar area sentuh 44x44px (touch-friendly di HP).
+    $base = 'inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-1';
     $variants = [
         'primary' => 'bg-primary text-white hover:bg-primary-dark focus:ring-primary',
         'secondary' => 'bg-secondary text-primary-dark hover:bg-secondary-dark focus:ring-secondary',

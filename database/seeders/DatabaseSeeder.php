@@ -176,28 +176,29 @@ class DatabaseSeeder extends Seeder
         // PPLG sengaja dapat 3 tingkat (X, XI, XII) karena jurusan ini paling relevan
         // dengan tema TA kamu sendiri (software) -- jurusan lain cukup 1 kelas (X) dulu.
         $classDefs = [
-            ['X TMI 1', 'TMI'],
-            ['X TKR 1', 'TKR'],
-            ['X TSM 1', 'TSM'],
-            ['X PPLG 1', 'PPLG'],
-            ['XI PPLG 1', 'PPLG'],
-            ['XII PPLG 1', 'PPLG'],
+            ['X TMI 1', 'TMI', 10],
+            ['X TKR 1', 'TKR', 10],
+            ['X TSM 1', 'TSM', 10],
+            ['X PPLG 1', 'PPLG', 10],
+            ['XI PPLG 1', 'PPLG', 11],
+            ['XII PPLG 1', 'PPLG', 12],
         ];
         // Wali kelas: guru produktif jurusan terkait (lazim di SMK -- wali kelas
         // jurusan biasanya dari guru produktif jurusan itu sendiri).
         $homeroomTeacherIndex = [5, 6, 7, 8, 9, 8];
 
         $classes = collect();
-        foreach ($classDefs as $i => [$name, $deptCode]) {
+        foreach ($classDefs as $i => [$name, $deptCode, $tingkat]) {
             $dept = $departments->firstWhere('code', $deptCode);
-
             $classes->push(SchoolClass::create([
                 'name' => $name,
+                'tingkat' => $tingkat,
                 'department_id' => $dept->id,
                 'academic_year_id' => $academicYear->id,
                 'homeroom_teacher_id' => $teachers[$homeroomTeacherIndex[$i]]->id,
             ]));
         }
+        
 
         $this->command->info('== 5/12: Murid (50 akun, dibagi ke 6 kelas) ==');
 

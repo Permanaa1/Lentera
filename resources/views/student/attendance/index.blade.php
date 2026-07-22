@@ -1,54 +1,45 @@
 @extends('layouts.app')
-
 @section('title', 'Absensi Saya')
-
 @section('content')
-<h1 class="text-xl font-semibold mb-6">Absensi Saya</h1>
+<x-page-header title="Absensi Saya" />
 
-<div class="bg-white p-4 rounded-lg shadow mb-6">
-    <p class="text-sm font-medium mb-3">Rekap Keseluruhan</p>
-    <div class="grid grid-cols-4 gap-4 text-sm">
-        <div>Hadir: <span class="font-medium text-green-700">{{ $recap['present'] ?? 0 }}</span></div>
-        <div>Alpa: <span class="font-medium text-red-700">{{ $recap['absent'] ?? 0 }}</span></div>
-        <div>Sakit: <span class="font-medium text-yellow-700">{{ $recap['sick'] ?? 0 }}</span></div>
-        <div>Izin: <span class="font-medium text-blue-700">{{ $recap['permission'] ?? 0 }}</span></div>
+<x-card class="mb-6" title="Rekap Keseluruhan">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div><span class="text-gray-500 block text-xs">Hadir</span> <span class="font-semibold text-success text-lg">{{ $recap['present'] ?? 0 }}</span></div>
+        <div><span class="text-gray-500 block text-xs">Alpa</span> <span class="font-semibold text-danger text-lg">{{ $recap['absent'] ?? 0 }}</span></div>
+        <div><span class="text-gray-500 block text-xs">Sakit</span> <span class="font-semibold text-yellow-700 text-lg">{{ $recap['sick'] ?? 0 }}</span></div>
+        <div><span class="text-gray-500 block text-xs">Izin</span> <span class="font-semibold text-info text-lg">{{ $recap['permission'] ?? 0 }}</span></div>
     </div>
-</div>
+</x-card>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="px-4 py-3 border-b font-medium text-sm">Riwayat Absensi</div>
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[420px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Tanggal</th>
-                <th class="px-4 py-2">Mata Pelajaran</th>
-                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Tanggal</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Mata Pelajaran</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Status</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($history as $a)
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ \Carbon\Carbon::parse($a->attendance_date)->translatedFormat('d M Y') }}</td>
-                    <td class="px-4 py-2">{{ $a->schedule->subject->name ?? '-' }}</td>
-                    <td class="px-4 py-2">
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Tanggal" class="px-4 py-3 text-gray-600">{{ \Carbon\Carbon::parse($a->attendance_date)->translatedFormat('d M Y') }}</td>
+                    <td data-label="Mata Pelajaran" class="px-4 py-3 font-medium text-gray-800">{{ $a->schedule->subject->name ?? '-' }}</td>
+                    <td data-label="Status" class="px-4 py-3">
                         @php
                             $labels = ['present' => 'Hadir', 'absent' => 'Alpa', 'sick' => 'Sakit', 'permission' => 'Izin'];
-                            $colors = [
-                                'present' => 'bg-green-100 text-green-800',
-                                'absent' => 'bg-red-100 text-red-800',
-                                'sick' => 'bg-yellow-100 text-yellow-800',
-                                'permission' => 'bg-blue-100 text-blue-800',
-                            ];
+                            $colors = ['present' => 'success', 'absent' => 'danger', 'sick' => 'secondary', 'permission' => 'info'];
                         @endphp
-                        <span class="px-2 py-0.5 rounded text-xs {{ $colors[$a->status] }}">{{ $labels[$a->status] }}</span>
+                        <x-badge :color="$colors[$a->status]">{{ $labels[$a->status] }}</x-badge>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="3" class="px-4 py-6 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>
+                <tr><td colspan="3"><x-empty-state message="Belum ada riwayat absensi." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 
 <div class="mt-4">{{ $history->links() }}</div>
 @endsection

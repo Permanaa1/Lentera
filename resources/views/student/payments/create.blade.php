@@ -1,19 +1,17 @@
 @extends('layouts.app')
-
 @section('title', 'Bayar Tagihan')
-
 @section('content')
-<h1 class="text-xl font-semibold mb-2">Bayar Tagihan</h1>
-<p class="text-sm text-gray-500 mb-6">Upload bukti transfer/pembayaran. Admin akan memverifikasi sebelum tagihan dianggap lunas.</p>
+<x-page-header title="Bayar Tagihan" subtitle="Upload bukti transfer/pembayaran. Admin akan memverifikasi sebelum tagihan dianggap lunas."
+    :back="route('student.invoices.index')" backLabel="Tagihan Saya" />
 
-<div class="bg-gray-100 p-4 rounded-lg mb-4 text-sm">
-    <p><span class="text-gray-500">Jenis:</span> {{ ucfirst($invoice->invoice_type) }}</p>
-    <p><span class="text-gray-500">Jumlah:</span> Rp{{ number_format($invoice->amount, 0, ',', '.') }}</p>
-    <p><span class="text-gray-500">Jatuh Tempo:</span> {{ $invoice->due_date->format('d M Y') }}</p>
-</div>
+<x-card class="mb-4">
+    <p class="text-sm"><span class="text-gray-500">Jenis:</span> <span class="font-medium">{{ ucfirst($invoice->invoice_type) }}</span></p>
+    <p class="text-sm"><span class="text-gray-500">Jumlah:</span> <span class="font-semibold">Rp{{ number_format($invoice->amount, 0, ',', '.') }}</span></p>
+    <p class="text-sm"><span class="text-gray-500">Jatuh Tempo:</span> {{ $invoice->due_date->format('d M Y') }}</p>
+</x-card>
 
 @if ($errors->any())
-    <div class="mb-4 px-4 py-3 rounded bg-red-100 text-red-700 text-sm">
+    <div class="bg-danger-subtle border-l-4 border-danger text-danger rounded-r-lg px-4 py-3 text-sm mb-4">
         <ul class="list-disc list-inside">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -23,39 +21,29 @@
 @endif
 
 <form method="POST" action="{{ route('student.invoices.payments.store', $invoice) }}"
-      enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow space-y-4 max-w-md">
+      enctype="multipart/form-data" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4 max-w-md">
     @csrf
 
-    <div>
-        <label class="block text-sm font-medium mb-1">Jumlah Dibayar (Rp)</label>
-        <input type="number" name="amount" value="{{ old('amount', $invoice->amount) }}" min="0" step="1000" required
-               class="w-full border rounded px-3 py-2 text-sm">
-    </div>
+    <x-input type="number" name="amount" label="Jumlah Dibayar (Rp)" :value="$invoice->amount" min="0" step="1000" required />
+
+    <x-select name="payment_method" label="Metode Pembayaran" required>
+        <option value="Transfer Bank">Transfer Bank</option>
+        <option value="QRIS">QRIS</option>
+        <option value="E-Wallet">E-Wallet</option>
+    </x-select>
+
+    <x-input name="transaction_number" label="No. Referensi/Transaksi (opsional)" />
 
     <div>
-        <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
-        <select name="payment_method" required class="w-full border rounded px-3 py-2 text-sm">
-            <option value="Transfer Bank">Transfer Bank</option>
-            <option value="QRIS">QRIS</option>
-            <option value="E-Wallet">E-Wallet</option>
-        </select>
-    </div>
-
-    <div>
-        <label class="block text-sm font-medium mb-1">No. Referensi/Transaksi (opsional)</label>
-        <input type="text" name="transaction_number" value="{{ old('transaction_number') }}"
-               class="w-full border rounded px-3 py-2 text-sm">
-    </div>
-
-    <div>
-        <label class="block text-sm font-medium mb-1">Bukti Pembayaran (JPG/PNG/PDF, maks 2MB)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Bukti Pembayaran (JPG/PNG/PDF, maks 2MB)</label>
         <input type="file" name="proof" accept=".jpg,.jpeg,.png,.pdf" required
-               class="w-full border rounded px-3 py-2 text-sm">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary-subtle file:text-primary file:text-sm
+                      focus:outline-none focus:ring-2 focus:ring-primary/20">
     </div>
 
-    <div class="flex gap-2">
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">Kirim</button>
-        <a href="{{ route('student.invoices.index') }}" class="px-4 py-2 rounded text-sm text-gray-600 hover:bg-gray-100">Batal</a>
+    <div class="flex gap-2 pt-2">
+        <x-button type="submit" variant="primary">Kirim</x-button>
+        <x-button href="{{ route('student.invoices.index') }}" variant="outline">Batal</x-button>
     </div>
 </form>
 @endsection

@@ -1,11 +1,7 @@
 @extends('layouts.app')
 
-{{-- Alpine.js sudah dimuat global di layouts/app.blade.php, tidak perlu load lagi di sini. --}}
-
 @section('content')
 <div x-data="{ sidebarOpen: false }">
-
-    {{-- Tombol menu -- cuma tampil di layar kecil (mobile) --}}
     <div class="md:hidden mb-4">
         <button @click="sidebarOpen = true"
                 class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm text-gray-700 font-medium">
@@ -16,15 +12,9 @@
         </button>
     </div>
 
-    {{-- Overlay gelap saat sidebar mobile terbuka --}}
-    <div x-show="sidebarOpen" x-cloak
-         @click="sidebarOpen = false"
-         class="fixed inset-0 bg-black/40 z-40 md:hidden"
-         x-transition.opacity></div>
+    <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 bg-black/40 z-40 md:hidden" x-transition.opacity></div>
 
     <div class="md:flex md:gap-6 md:items-start">
-
-        {{-- Sidebar: drawer slide-in di mobile, statis di desktop --}}
         <aside
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             class="fixed top-0 left-0 h-screen w-72 bg-white z-50 p-4 overflow-y-auto
@@ -48,6 +38,7 @@
                             ['route' => 'admin.dashboard', 'label' => 'Dashboard'],
                             ['route' => 'admin.users.index', 'label' => 'Pengguna'],
                             ['route' => 'admin.students.index', 'label' => 'Kelola Murid'],
+                            ['route' => 'admin.promotions.index', 'label' => 'Kenaikan Kelas'],
                             ['route' => 'admin.parent-links.index', 'label' => 'Wali Murid & Anak'],
                         ],
                         'Akademik' => [
@@ -71,9 +62,7 @@
 
                 @foreach ($groups as $groupLabel => $items)
                     <div>
-                        <p class="px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                            {{ $groupLabel }}
-                        </p>
+                        <p class="px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ $groupLabel }}</p>
                         <div class="space-y-0.5">
                             @foreach ($items as $item)
                                 <a href="{{ route($item['route']) }}"

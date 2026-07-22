@@ -9,17 +9,21 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    // Memperbaiki gap Fase 4: sebelumnya admin bisa bikin SchoolClass, tapi
-    // tidak ada halaman untuk menempatkan murid ke kelas itu (students.class_id
-    // selalu kosong). Ini murni akademik (AIS), tidak menyentuh Course/LMS.
-
     public function index(Request $request)
     {
+        $perPage = (int) $request->input('per_page', 15);
+        $perPage = in_array($perPage, [15, 25, 50, 100]) ? $perPage : 15;
+
         $students = Student::with('user', 'schoolClass')
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where('nis', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $request->search . '%'));
+            })
             ->when($request->filled('class_id'), fn ($q) => $q->where('class_id', $request->class_id))
-            ->when($request->filled('unassigned'), fn ($q) => $q->whereNull('class_id'))
+            ->when($request->filled('status'), fn ($q) => $q->where('academic_status', $request->status))
+            ->when($request->boolean('unassigned'), fn ($q) => $q->whereNull('class_id'))
             ->orderBy('nis')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         $classes = SchoolClass::orderBy('name')->get();
@@ -30,16 +34,23 @@ class StudentController extends Controller
     public function edit(Student $student)
     {
         $classes = SchoolClass::orderBy('name')->get();
+        $histories = $student->classHistories()->with('schoolClass', 'academicYear')->get();
 
-        return view('admin.students.edit', compact('student', 'classes'));
+        return view('admin.students.edit', compact('student', 'classes', 'histories'));
     }
 
     public function update(Request $request, Student $student)
     {
         $data = $request->validate([
             'class_id' => ['nullable', 'exists:classes,id'],
-            'academic_status' => ['required', 'in:active,leave,graduated'],
+            'academic_status' => ['required', 'in:active,leave,graduated,transferred,dropped_out'],
         ]);
+
+        // Kalau status diubah jadi bukan aktif, kosongkan kelas -- murid yang lulus/pindah/keluar
+        // tidak masuk hitungan "murid aktif di kelas X" manapun lagi.
+        if ($data['academic_status'] !== 'active' && $data['academic_status'] !== 'leave') {
+            $data['class_id'] = null;
+        }
 
         $student->update($data);
 

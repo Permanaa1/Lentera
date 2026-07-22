@@ -1,44 +1,46 @@
 @extends('layouts.admin')
-
 @section('title', 'Wali Murid & Anak')
-
 @section('admin-content')
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold">Hubungan Wali Murid & Anak</h1>
-    <a href="{{ route('admin.parent-links.create') }}"
-       class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">+ Hubungkan</a>
-</div>
+<x-page-header title="Wali Murid & Anak" subtitle="Kelola hubungan akun wali murid dengan murid (fallback manual)."
+    :breadcrumbs="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Wali Murid & Anak']]">
+    <x-slot:actions>
+        <x-button href="{{ route('admin.parent-links.create') }}" variant="primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Hubungkan
+        </x-button>
+    </x-slot:actions>
+</x-page-header>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left">
+<x-table-wrapper>
+    <table class="responsive-table w-full text-sm min-w-[560px]">
+        <thead class="bg-gray-50 text-left">
             <tr>
-                <th class="px-4 py-2">Wali Murid</th>
-                <th class="px-4 py-2">Murid</th>
-                <th class="px-4 py-2">Kelas</th>
-                <th class="px-4 py-2 w-24">Aksi</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Wali Murid</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Murid</th>
+                <th class="px-4 py-3 font-semibold text-gray-600">Kelas</th>
+                <th class="px-4 py-3 font-semibold text-gray-600 w-20 text-right">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             @forelse ($links as $link)
-                <tr class="border-t">
-                    <td class="px-4 py-2">{{ $link->parentUser->user->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $link->student->user->name ?? '-' }} ({{ $link->student->nis ?? '-' }})</td>
-                    <td class="px-4 py-2">{{ $link->student->schoolClass->name ?? '-' }}</td>
-                    <td class="px-4 py-2">
-                        <form method="POST" action="{{ route('admin.parent-links.destroy', $link) }}" class="inline"
+                <tr class="hover:bg-surface/60 transition">
+                    <td data-label="Wali Murid" class="px-4 py-3 font-medium text-gray-800">{{ $link->parentUser->user->name ?? '-' }}</td>
+                    <td data-label="Murid" class="px-4 py-3 text-gray-600">{{ $link->student->user->name ?? '-' }} ({{ $link->student->nis ?? '-' }})</td>
+                    <td data-label="Kelas" class="px-4 py-3 text-gray-600">{{ $link->student->schoolClass->name ?? '-' }}</td>
+                    <td data-label="Aksi" class="px-4 py-3 text-right">
+                        <form method="POST" action="{{ route('admin.parent-links.destroy', $link) }}" class="inline-block"
                               onsubmit="return confirm('Putus hubungan ini?')">
                             @csrf @method('DELETE')
-                            <button class="text-red-600 hover:underline">Putus</button>
+                            <x-icon-button variant="delete" label="Putus Hubungan" />
                         </form>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td></tr>
+                <tr><td colspan="4"><x-empty-state message="Belum ada hubungan wali murid & anak." /></td></tr>
             @endforelse
         </tbody>
     </table>
-</div>
+</x-table-wrapper>
 
 <div class="mt-4">{{ $links->links() }}</div>
 @endsection

@@ -70,8 +70,44 @@ class Student extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function classHistories()
+    {
+        return $this->hasMany(StudentClassHistory::class)->orderByDesc('academic_year_id');
+    }
+
     public function isActive(): bool
     {
         return $this->academic_status === 'active';
+    }
+
+    /**
+     * Rata-rata nilai akhir murid ini di semua course pada semester tertentu
+     * (dibutuhkan untuk pertimbangan naik/tidak naik kelas).
+     */
+    public function averageGrade(?int $semesterId = null): ?float
+    {
+        $query = $this->grades()->whereNotNull('final_score');
+
+        if ($semesterId) {
+            $query->whereHas('course', fn ($q) => $q->where('semester_id', $semesterId));
+        }
+
+        return $query->avg('final_score') !== null ? round($query->avg('final_score'), 2) : null;
+    }
+
+    /**
+     * Persentase kehadiran murid ini (dari seluruh data absensi yang tercatat).
+     */
+    public function attendanceRate(): ?float
+    {
+        $total = $this->attendances()->count();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        $present = $this->attendances()->where('status', 'present')->count();
+
+        return round(($present / $total) * 100, 1);
     }
 }

@@ -1,29 +1,27 @@
 @extends('layouts.app')
-
 @section('title', 'Rapor Murid')
-
 @section('content')
-<h1 class="text-xl font-semibold mb-6">Rapor Murid (Kelas Perwalian)</h1>
+<x-page-header title="Rapor Murid" subtitle="Khusus untuk guru yang berstatus wali kelas." />
 
 @forelse ($homeroomClasses as $class)
-    <div class="bg-white rounded-lg shadow p-4 mb-4">
-        <p class="font-medium mb-3">{{ $class->name }} ({{ $class->students_count }} murid)</p>
-        <a href="{{ route('teacher.report-card.index') }}#class-{{ $class->id }}" class="hidden"></a>
-        <div id="class-{{ $class->id }}">
+    <x-card :title="$class->name . ' (' . $class->students_count . ' murid)'" class="mb-4">
+        <div class="divide-y divide-gray-100 -mx-5">
             @foreach ($class->students as $student)
-                <div class="flex items-center justify-between border-t py-2 text-sm">
-                    <span>{{ $student->nis }} — {{ $student->user->name ?? '-' }}</span>
-                    <a href="{{ route('teacher.report-card.show', [$class, $student]) }}" class="text-indigo-600 hover:underline">
+                <div class="px-5 py-3 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">{{ $student->user->name ?? '-' }}</p>
+                        <p class="text-xs text-gray-400">NIS: {{ $student->nis }}</p>
+                    </div>
+                    <x-button href="{{ route('teacher.report-card.show', [$class, $student]) }}" variant="outline">
                         Lihat Rapor
-                    </a>
+                    </x-button>
                 </div>
             @endforeach
         </div>
-    </div>
+    </x-card>
 @empty
-    <div class="bg-white rounded-lg shadow p-6 text-center text-gray-400">
-        Anda bukan wali kelas manapun. Fitur ini cuma untuk guru yang ditugaskan sebagai wali kelas
-        (diatur admin di menu Kelas).
-    </div>
+    <x-card>
+        <x-empty-state message="Anda bukan wali kelas manapun. Fitur ini cuma untuk guru yang ditugaskan sebagai wali kelas (diatur admin di menu Kelas)." />
+    </x-card>
 @endforelse
 @endsection
